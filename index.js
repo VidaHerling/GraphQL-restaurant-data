@@ -89,25 +89,35 @@ type Mutation{
   editrestaurant(id: Int!, name: String!): restaurant
 }
 `);
-// The root provides a resolver function for each API endpoint
 
+// The root provides a resolver function for each API endpoint
 var root = {
-  restaurant: (arg) => {
-    // Your code goes here
-  },
-  restaurants: () => {
-    // Your code goes here
-  },
+  restaurant: (arg) => restaurants[arg.id],
+  restaurants: () => restaurants,
   setrestaurant: ({ input }) => {
-    // Your code goes here
+    restaurants.push({
+      id: restaurants.length + 1,
+      name: input.name,
+      description: input.description
+    });
+    return input;
   },
   deleterestaurant: ({ id }) => {
-    // Your code goes here
+    const ok = Boolean(restaurants[id - 1]);
+    restaurants = restaurants.filter(item => item.id !== id);
+    return { ok };
   },
   editrestaurant: ({ id, ...restaurant }) => {
-    // Your code goes here
-  },
+    if(!restaurants[id]) {
+      throw new Error ("the restaurant doesn't exist.")
+    }
+    restaurants[id] = {
+      ...restaurants[id], 
+      ...restaurant};
+    return restaurants[id];
+  }
 };
+
 var app = express();
 app.use(
   "/graphql",
@@ -120,4 +130,4 @@ app.use(
 var port = 5500;
 app.listen(5500, () => console.log("Running Graphql on Port:" + port));
 
-export default root;
+//export default root;
